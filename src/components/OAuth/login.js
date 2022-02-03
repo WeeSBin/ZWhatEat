@@ -55,15 +55,7 @@ const Login = ({history, location, match, setToken}) => {
         />
       </Box>
       <Typography className={classes.typo_first}>
-        잠시 기다려주세요. <strike>무료 서버라서 그런지 느리네요.</strike>
-      </Typography>
-      <Typography className={classes.typo_else}>
-        아니면 
-        <Link to={`/raffle/${category}`}><b> 여길 </b></Link>
-        눌러서 이전 화면으로 돌아가셨다가
-      </Typography>
-      <Typography className={classes.typo_else}>
-        조금 있다가 다시 돌아오면 될 거에요!!!
+        잠시 기다려주세요.
       </Typography>
     </Box>
   )
