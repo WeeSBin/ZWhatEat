@@ -139,7 +139,8 @@ const Raffle = ({token, match}) => {
         </Box>
         {/* Middle #e */}
         {/* Bottom #s */}
-        <Regist token={token} issueNumber={issue_number} category={category} updateMenu={updateMenu}/>
+        {/* Heroku Access Token 보안 이슈로 인해 주석 처리 */}
+        {/*<Regist token={token} issueNumber={issue_number} category={category} updateMenu={updateMenu}/>*/}
         {/* Bottom #e */}
       </Container>
     </Box>
