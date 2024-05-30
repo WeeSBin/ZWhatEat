@@ -1,4 +1,4 @@
-package com.emptycastle.temp
+package com.emptycastle.whateat
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,6 +1,6 @@
 {
-    "name": "temp",
-    "short_name": "temp",
+    "name": "뭐먹지",
+    "short_name": "뭐먹지",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
