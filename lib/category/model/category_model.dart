@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class Category {
+class CategoryModel {
   final Color color;
   final String text;
 
-  Category({required this.color, required this.text});
+  CategoryModel({required this.color, required this.text});
 }

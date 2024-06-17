@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'model/category.dart';
+import 'model/category_model.dart';
 
 class CategoryScreen extends StatefulWidget {
   final void Function() onLastItem;
@@ -13,12 +13,12 @@ class CategoryScreen extends StatefulWidget {
 
 class _CategoryScreenState extends State<CategoryScreen> {
 
-  List<Category> categories = [
-    Category(color: Colors.red, text: '한식'),
-    Category(color: Colors.green, text: '중식'),
-    Category(color: Colors.blue, text: '양식'),
-    Category(color: Colors.yellow, text: '일식'),
-    Category(color: Colors.purple, text: '분식'),
+  List<CategoryModel> categories = [
+    CategoryModel(color: Colors.red, text: '한식'),
+    CategoryModel(color: Colors.green, text: '중식'),
+    CategoryModel(color: Colors.blue, text: '양식'),
+    CategoryModel(color: Colors.yellow, text: '일식'),
+    CategoryModel(color: Colors.purple, text: '분식'),
   ];
 
   @override
@@ -30,7 +30,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
     );
   }
 
-  Widget buildDismissibleContainer(Category category) {
+  Widget buildDismissibleContainer(CategoryModel category) {
     return Expanded(
       child: Dismissible(
         key: Key(category.text),
