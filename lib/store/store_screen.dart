@@ -19,6 +19,8 @@ class StoreScreen extends StatefulWidget {
 
 class _StoreScreenState extends State<StoreScreen> {
   List<Restaurant> restaurants = [];
+  List<bool> isSelected = [true, false]; // 초기 선택 상태
+  String currentSort = 'distance';
 
   @override
   Widget build(BuildContext context) {
@@ -26,19 +28,33 @@ class _StoreScreenState extends State<StoreScreen> {
       children: [
         // 정렬 및 필터링 버튼
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            ElevatedButton(
-              onPressed: () {
-                // 필터 로직
+            ToggleButtons(
+              renderBorder: false,
+              constraints: const BoxConstraints(
+                minHeight: 30,
+                minWidth: 60,
+              ),
+              borderColor: Colors.grey,
+              fillColor: Colors.blue,
+              borderWidth: 0,
+              selectedBorderColor: Colors.blue,
+              selectedColor: Colors.white,
+              onPressed: (int index) {
+                sortTogglePressed(index);
               },
-              child: const Text('필터'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // 정렬 로직
-              },
-              child: const Text('정렬'),
+              isSelected: isSelected,
+              children: const <Widget>[
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text('거리 순'),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text('정확도 순'),
+                ),
+              ],
             ),
           ],
         ),
@@ -79,7 +95,10 @@ class _StoreScreenState extends State<StoreScreen> {
                     ),
                   ),
                   subtitle: Text(restaurant.address),
-                  trailing: Text('${restaurant.distance}m'),
+                  trailing: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('${restaurant.distance}m'),
+                  ),
                 ),
               );
             },
@@ -87,6 +106,18 @@ class _StoreScreenState extends State<StoreScreen> {
         ),
       ],
     );
+  }
+
+  void sortTogglePressed(int index) {
+    setState(() {
+      for (int buttonIndex = 0;
+          buttonIndex < isSelected.length;
+          buttonIndex++) {
+        isSelected[buttonIndex] = buttonIndex == index;
+      }
+      currentSort = index == 0 ? 'distance' : 'accuracy';
+      searchNearbyRestaurants();
+    });
   }
 
   @override
@@ -112,14 +143,14 @@ class _StoreScreenState extends State<StoreScreen> {
 
     Position position = await determinePosition();
 
-    int radius = 5000;
+    int radius = 2000;
 
     var url = Uri.parse('https://dapi.kakao.com/v2/local/search/category.json?'
         'category_group_code=FD6'
         '&x=${position.longitude}'
         '&y=${position.latitude}'
         '&radius=$radius'
-        '&sort=distance');
+        '&sort=$currentSort');
 
     var response = await http.get(url, headers: headers);
 
