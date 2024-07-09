@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:whateat/category/category_screen.dart';
-import 'package:whateat/store/store_screen.dart';
+import 'package:whateat/screen/category_screen.dart';
+import 'package:whateat/screen/store_screen.dart';
+
+import 'model/category_model.dart';
 
 void main() async {
   await dotenv.load(fileName: ".env");
@@ -35,13 +37,18 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  bool showCategory = false;
+  bool showCategory = true;
+  late CategoryModel lastCategory;
 
-  void toggleScreen() {
+  void toggleScreen(CategoryModel lastCategory) {
     setState(() {
       showCategory = !showCategory;
+      this.lastCategory = lastCategory;
     });
   }
+
+  // todo 전체 색상 팔레트 정하기
+  // todo 구글 광고 올리기
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: showCategory
           ? CategoryScreen(onLastItem: toggleScreen)
-          : const StoreScreen(),
+          : StoreScreen(lastCategory: lastCategory),
       bottomNavigationBar: BottomAppBar(
         color: Colors.grey[200],
         height: 50,
