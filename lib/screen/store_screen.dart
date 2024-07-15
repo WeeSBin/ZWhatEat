@@ -21,98 +21,101 @@ class StoreScreen extends StatefulWidget {
 }
 
 class _StoreScreenState extends State<StoreScreen> {
+  bool isLoading = false;
   List<Restaurant> restaurants = [];
-  List<bool> isSelected = [true, false]; // 초기 선택 상태
+  List<bool> isSelected = [true, false];
   String currentSort = 'distance';
 
   // todo 조회 페이징 적용
-  // todo 뒤로가기하면 category_screen으로 다시 돌아가게끔
   // todo radius 선택할수 있게끔 클릭 하면 500 1000 늘어나다가 다시 500으로 돌아오는 식으로
   // todo 주소보단 카테고리를 띄우는게 더 의미가 있지 않을까
-  // todo 조회 중에 로딩 중 표시 띄우기
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
       children: [
-        // 정렬 및 필터링 버튼
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
+        Column(
           children: [
-            ToggleButtons(
-              renderBorder: false,
-              constraints: const BoxConstraints(
-                minHeight: 30,
-                minWidth: 60,
-              ),
-              borderColor: Colors.grey,
-              fillColor: Colors.blue,
-              borderWidth: 0,
-              selectedBorderColor: Colors.blue,
-              selectedColor: Colors.white,
-              onPressed: (int index) {
-                sortTogglePressed(index);
-              },
-              isSelected: isSelected,
-              children: const <Widget>[
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text('거리 순'),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: Text('정확도 순'),
+            // 정렬 및 필터링 버튼
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ToggleButtons(
+                  renderBorder: false,
+                  constraints: const BoxConstraints(
+                    minHeight: 30,
+                    minWidth: 60,
+                  ),
+                  borderColor: Colors.grey,
+                  fillColor: Colors.blue,
+                  borderWidth: 0,
+                  selectedBorderColor: Colors.blue,
+                  selectedColor: Colors.white,
+                  onPressed: (int index) {
+                    sortTogglePressed(index);
+                  },
+                  isSelected: isSelected,
+                  children: const <Widget>[
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text('거리 순'),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8),
+                      child: Text('정확도 순'),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-        // 리스트 뷰
-        Expanded(
-          child: ListView.builder(
-            itemCount: restaurants.length,
-            itemBuilder: (context, index) {
-              final restaurant = restaurants[index];
-              return Container(
-                decoration: const BoxDecoration(
-                    border: Border(
-                  bottom: BorderSide(
-                    width: 1.0,
-                    color: Colors.grey,
-                  ),
-                )),
-                child: ListTile(
-                  title: RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: restaurant.name,
+            Expanded(
+              child: ListView.builder(
+                itemCount: restaurants.length,
+                itemBuilder: (context, index) {
+                  final restaurant = restaurants[index];
+                  return Container(
+                    decoration: const BoxDecoration(
+                        border: Border(
+                      bottom: BorderSide(
+                        width: 1.0,
+                        color: Colors.grey,
+                      ),
+                    )),
+                    child: ListTile(
+                      title: RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: restaurant.name,
+                              style: const TextStyle(
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  _launchUrl(restaurant.placeUrl);
+                                },
+                            ),
+                          ],
                           style: const TextStyle(
-                            color: Colors.blue,
-                            decoration: TextDecoration.underline,
+                            fontSize: 16.0,
+                            color: Colors.black,
                           ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              _launchUrl(restaurant.placeUrl);
-                            },
                         ),
-                      ],
-                      style: const TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.black,
+                      ),
+                      subtitle: Text(restaurant.categoryName),
+                      trailing: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('${restaurant.distance}m'),
                       ),
                     ),
-                  ),
-                  subtitle: Text(restaurant.address),
-                  trailing: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('${restaurant.distance}m'),
-                  ),
-                ),
-              );
-            },
-          ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
+        if (isLoading) const Center(child: CircularProgressIndicator()),
       ],
     );
   }
@@ -142,6 +145,10 @@ class _StoreScreenState extends State<StoreScreen> {
   }
 
   Future<void> searchNearbyRestaurants() async {
+    setState(() {
+      isLoading = true;
+    });
+
     String? apiKey = dotenv.env['KAKAO_API_KEY'];
     if (apiKey == null) {
       throw Exception("카카오 API 키 로드 실패");
@@ -161,17 +168,20 @@ class _StoreScreenState extends State<StoreScreen> {
         '&radius=$radius'
         '&sort=$currentSort');
 
-    // fixme
-    print('searchNearbyRestaurants: ${url.toString()}');
     var response = await http.get(url, headers: headers);
 
     if (response.statusCode == 200) {
       var jsonResponse = json.decode(response.body)['documents'] as List;
       setState(() {
+        print(jsonResponse);
         restaurants =
             jsonResponse.map((data) => Restaurant.fromJson(data)).toList();
+        isLoading = false;
       });
     } else {
+      setState(() {
+        isLoading = false;
+      });
       throw Exception('Failed to load nearby restaurants');
     }
   }

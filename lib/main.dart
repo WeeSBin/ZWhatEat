@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:whateat/screen/category_screen.dart';
 import 'package:whateat/screen/store_screen.dart';
@@ -36,9 +37,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   bool showCategory = true;
   late CategoryModel lastCategory;
+  DateTime? lastPressed;
 
   void toggleScreen(CategoryModel lastCategory) {
     setState(() {
@@ -52,20 +53,50 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: showCategory
-          ? CategoryScreen(onLastItem: toggleScreen)
-          : StoreScreen(lastCategory: lastCategory),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.grey[200],
-        height: 50,
-        child: Container(
-          child: const Center(
-            child: Text('Bottom Area'),
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        if (showCategory) {
+          final now = DateTime.now();
+          final backButtonHasNotBeenPressedOrSnackBarHasBeenClosed = lastPressed == null ||
+              now.difference(lastPressed!) > const Duration(seconds: 2);
+
+          if (backButtonHasNotBeenPressedOrSnackBarHasBeenClosed) {
+            lastPressed = DateTime.now();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('한 번 더 뒤로 가면 앱이 닫힙니다.'),
+                duration: Duration(seconds: 2),
+              ),
+            );
+          } else {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              SystemNavigator.pop();
+            }
+          }
+        } else {
+          setState(() {
+            showCategory = true;
+          });
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text(widget.title),
+        ),
+        body: showCategory
+            ? CategoryScreen(onLastItem: toggleScreen)
+            : StoreScreen(lastCategory: lastCategory),
+        bottomNavigationBar: BottomAppBar(
+          color: Colors.grey[200],
+          height: 50,
+          child: Container(
+            child: const Center(
+              child: Text('Bottom Area'),
+            ),
           ),
         ),
       ),
